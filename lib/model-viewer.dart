@@ -17,6 +17,7 @@ class ModelViewer extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget modelViewer = model_viewer.ModelViewer(
       src: "assets/3d_models/${model.modelName}",
+      key: _viewerKey,
     );
     return Scaffold(
       appBar: appBar(),
