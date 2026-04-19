@@ -6,13 +6,18 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ModelViewer extends StatelessWidget {
-  const ModelViewer({
+  ModelViewer({
     super.key,
     required this.model,
   });
   final Model model;
+  final GlobalKey _viewerKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
+    final Widget modelViewer = model_viewer.ModelViewer(
+      src: "assets/3d_models/${model.modelName}",
+    );
     return Scaffold(
       appBar: appBar(),
       drawer: NavBar(),
@@ -26,11 +31,9 @@ class ModelViewer extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     height: MediaQuery.of(context).size.height / 2,
-                    child: model_viewer.ModelViewer(
-                      src: "assets/3d_models/${model.modelName}",
-                    ),
+                    child: modelViewer,
                   ),
-                  //TODO: Display Details
+                  //Display Details
                   Expanded(
                     child: SingleChildScrollView(
                       child: ModelDetailsDisplayer(
@@ -47,11 +50,9 @@ class ModelViewer extends StatelessWidget {
                   SizedBox(
                     width: MediaQuery.of(context).size.width / 2,
                     height: double.infinity,
-                    child: model_viewer.ModelViewer(
-                      src: "assets/3d_models/${model.modelName}",
-                    ),
+                    child: modelViewer,
                   ),
-                  //TODO: Display Details
+                  //Display Details
                   Expanded(
                     child: SingleChildScrollView(
                       child: ModelDetailsDisplayer(
