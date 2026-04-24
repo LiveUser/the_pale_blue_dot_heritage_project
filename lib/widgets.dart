@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:http/http.dart';
+import 'dart:convert';
+import 'dart:html' as html;
 
 AppBar appBar(){
   return AppBar(
@@ -228,6 +232,79 @@ class _SpeakLoudButtonState extends State<SpeakLoudButton> {
           color: Colors.orange,
         ),
       ),
+    );
+  }
+}
+class SuperModelViewer extends StatefulWidget {
+  const SuperModelViewer({
+    super.key,
+    required this.objectUUID,
+  });
+  final String objectUUID;
+  @override
+  State<SuperModelViewer> createState() => _SuperModelViewerState();
+}
+
+class _SuperModelViewerState extends State<SuperModelViewer> {
+  Future<String> fetchData()async{
+    String url = "https://man-well-sharply.ngrok-free.app/3d-model/${widget.objectUUID}";
+    //print(url);
+    Response response = await get(
+      Uri.parse(url),
+      headers: {
+        'ngrok-skip-browser-warning': 'true', // This skips the ngrok landing page
+        'Content-Type': 'application/bson',
+      },
+    );
+    // Create a Blob from the bytes
+    final blob = html.Blob([response.bodyBytes], 'model/gltf-binary');
+    
+    // Create a temporary URL pointing to that Blob
+    final blobUrl = html.Url.createObjectUrlFromBlob(blob);
+    
+    return blobUrl;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: fetchData(),
+      builder: (context,snapshot){
+        if(snapshot.hasError){
+          return GestureDetector(
+            onTap: (){
+              setState(() {
+                
+              });
+            },
+            child: Center(
+              child: Container(
+                color: Colors.orange,
+                padding: EdgeInsets.all(10),
+                child: Text(
+                  "Reload",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }else if(snapshot.connectionState == ConnectionState.done){
+          return ModelViewer(
+            key: widget.key,
+            src: snapshot.data as String,
+            autoRotate: true,
+            cameraControls: true,
+          );
+        }else{
+          return Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Colors.orange),
+            ),
+          );
+        }
+      },
     );
   }
 }

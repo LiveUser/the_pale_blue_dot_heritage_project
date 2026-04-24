@@ -3,7 +3,8 @@ import 'package:the_pale_blue_dot_heritage_project/dataset.dart';
 import 'widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:model_viewer_plus/model_viewer_plus.dart' as model_viewer_plus;
+import 'package:flutter_html/flutter_html.dart';
+
 class ModelViewer extends StatelessWidget {
   const ModelViewer({
     super.key,
@@ -13,13 +14,9 @@ class ModelViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    GlobalKey _viewerKey = GlobalKey();
 
-    final Widget modelViewer = model_viewer_plus.ModelViewer(
-      key: _viewerKey,
-      src: "https://man-well-sharply.ngrok-free.app/3d-model/${model.objectUUID}",
-      autoRotate: true,
-      cameraControls: true,
+    final Widget modelViewer = SuperModelViewer(
+      objectUUID: model.objectUUID,
     );
 
     return Scaffold(
@@ -102,11 +99,11 @@ class ModelDetailsDisplayer extends StatelessWidget {
               fontFamily: "SairaStencil",
             ),
           ),
-          Text(
-            model.description,
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: "SairaStencil",
+          Container(
+            padding: EdgeInsets.all(10),
+            color: Colors.white,
+            child: Html(
+              data: model.description,
             ),
           ),
           GestureDetector(

@@ -38,6 +38,7 @@ dependencies:
   bson: ^5.0.8
   path_provider: ^2.1.5
   model_viewer_plus: ^1.10.0
+  flutter_html: ^3.0.0
 
 dev_dependencies:
   flutter_test:

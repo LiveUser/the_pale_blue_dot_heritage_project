@@ -64,16 +64,12 @@ class IconicModel extends StatefulWidget {
 }
 
 class _IconicModelState extends State<IconicModel> {
-  final GlobalKey _viewerKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     // Define the viewer once. Make sure this path exists in pubspec.yaml!
-    final Widget modelViewer = ModelViewer(
-      key: _viewerKey,
-      src: "https://man-well-sharply.ngrok-free.app/default-model",
-      autoRotate: true,
-      cameraControls: true,
+    final Widget modelViewer = SuperModelViewer(
+      objectUUID: "default-model",
     );
 
     return OrientationBuilder(
