@@ -29,14 +29,22 @@ class _DigitalLibraryState extends State<DigitalLibrary> {
     };
     Response response = await post(
       Uri.parse("https://man-well-sharply.ngrok-free.app/graphene"),
+      body: BsonCodec.serialize(requestBody).byteList,
+      headers: {
+        'ngrok-skip-browser-warning': 'true', // This skips the ngrok landing page
+        'Content-Type': 'application/bson',
+      },
     );
     Map<String,dynamic> responseData = BsonCodec.deserialize(BsonBinary.from(response.bodyBytes));
+    //print("---------------------------------------------------------");
+    //print(responseData);
+    //print("---------------------------------------------------------");
     for(Map<String,dynamic> model in responseData["data"]){
       models.add(Model(
         title: model["title"] ?? "No title", 
-        description: model["title"] ?? "No description", 
+        description: model["description"] ?? "No description", 
         zenodoDigitalObjectIdentifier: model["zenodoDOI"], 
-        objectUUID: model["model-uuid"],
+        objectUUID: model["model"]["uuid"],
       ));
     }
     return models;
@@ -57,13 +65,15 @@ class _DigitalLibraryState extends State<DigitalLibrary> {
                   
                 });
               },
-              child: Container(
-                color: Colors.orange,
-                padding: EdgeInsets.all(10),
-                child: Text(
-                  "Reload",
-                  style: TextStyle(
-                    color: Colors.white,
+              child: Center(
+                child: Container(
+                  color: Colors.orange,
+                  padding: EdgeInsets.all(10),
+                  child: Text(
+                    "Reload",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

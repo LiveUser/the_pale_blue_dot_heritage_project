@@ -30,13 +30,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  model_viewer_plus: ^1.10.0
   flutter_tts: ^4.2.5
   lost: ^0.0.2+4
   sortero: ^0.0.4+4
   url_launcher: ^6.3.2
   http: ^1.6.0
   bson: ^5.0.8
+  path_provider: ^2.1.5
+  model_viewer_plus: ^1.10.0
 
 dev_dependencies:
   flutter_test:

@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:the_pale_blue_dot_heritage_project/dataset.dart';
 import 'widgets.dart';
-import 'package:model_viewer_plus/model_viewer_plus.dart' as model_viewer;
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:model_viewer_plus/model_viewer_plus.dart' as model_viewer_plus;
 class ModelViewer extends StatelessWidget {
-  ModelViewer({
+  const ModelViewer({
     super.key,
     required this.model,
   });
   final Model model;
-  final GlobalKey _viewerKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
-    final Widget modelViewer = model_viewer.ModelViewer(
-      src: "https://man-well-sharply.ngrok-free.app/3d-model/${model.objectUUID}",
+    GlobalKey _viewerKey = GlobalKey();
+
+    final Widget modelViewer = model_viewer_plus.ModelViewer(
       key: _viewerKey,
+      src: "https://man-well-sharply.ngrok-free.app/3d-model/${model.objectUUID}",
+      autoRotate: true,
+      cameraControls: true,
     );
+
     return Scaffold(
       appBar: appBar(),
       drawer: NavBar(),
