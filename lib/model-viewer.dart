@@ -16,7 +16,7 @@ class ModelViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget modelViewer = model_viewer.ModelViewer(
-      src: "assets/3d_models/${model.modelName}",
+      src: "https://man-well-sharply.ngrok-free.app/3d-model/${model.objectUUID}",
       key: _viewerKey,
     );
     return Scaffold(
@@ -76,15 +76,6 @@ class ModelDetailsDisplayer extends StatelessWidget {
     required this.model,
   });
   final Model model;
-  Future<String> fetchDescription()async{
-    String description  = "";
-    try{
-      description = await rootBundle.loadString("assets/descriptions/${model.description}");
-    }catch(error){
-      //Do nothing
-    }
-    return description;
-  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -102,13 +93,6 @@ class ModelDetailsDisplayer extends StatelessWidget {
             ),
           ),
           Text(
-            "University ID: ${model.universityID}",
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: "SairaStencil",
-            ),
-          ),
-          Text(
             "Zenodo Digital Object Identifier: ${model.zenodoDigitalObjectIdentifier}",
             style: TextStyle(
               color: Colors.white,
@@ -116,36 +100,11 @@ class ModelDetailsDisplayer extends StatelessWidget {
             ),
           ),
           Text(
-            "Location found: ${model.locationFound}",
+            model.description,
             style: TextStyle(
               color: Colors.white,
               fontFamily: "SairaStencil",
             ),
-          ),
-          Text(
-            model.dateTimeFound == null ? "Date Found: null" : "Date Found: ${model.dateTimeFound!.year}-${model.dateTimeFound!.month}-${model.dateTimeFound!.day}",
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: "SairaStencil",
-            ),
-          ),
-          FutureBuilder(
-            future: fetchDescription(), 
-            builder: (context,asyncSnapshot){
-              if(asyncSnapshot.connectionState == ConnectionState.waiting){
-                return CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
-                );
-              }else{
-                return Text(
-                  (asyncSnapshot.data as String).isEmpty ? "Description: No description" : "Description: ${asyncSnapshot.data}",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: "SairaStencil",
-                  ),
-                );
-              }
-            },
           ),
           GestureDetector(
             onTap: (){

@@ -5,97 +5,107 @@ import 'dataset.dart';
 import 'package:lost/lost.dart';
 import 'package:flutter/services.dart';
 import 'package:sortero/sortero.dart';
+import 'package:http/http.dart';
+import 'package:bson/bson.dart';
 
-class DigitalLibrary extends StatelessWidget {
-  DigitalLibrary({
+class DigitalLibrary extends StatefulWidget {
+  const DigitalLibrary({
     super.key,
   });
+
+  @override
+  State<DigitalLibrary> createState() => _DigitalLibraryState();
+}
+
+class _DigitalLibraryState extends State<DigitalLibrary> {
   final TextEditingController searchQuery = TextEditingController();
+  Future<List<Model>> fetchModels()async{
+    List<Model> models = [];
+    Map<String,dynamic> requestBody = {
+      "variables": {
+        
+      },
+      "query": "get-object-list",
+    };
+    Response response = await post(
+      Uri.parse("https://man-well-sharply.ngrok-free.app/graphene"),
+    );
+    Map<String,dynamic> responseData = BsonCodec.deserialize(BsonBinary.from(response.bodyBytes));
+    for(Map<String,dynamic> model in responseData["data"]){
+      models.add(Model(
+        title: model["title"] ?? "No title", 
+        description: model["title"] ?? "No description", 
+        zenodoDigitalObjectIdentifier: model["zenodoDOI"], 
+        objectUUID: model["model-uuid"],
+      ));
+    }
+    return models;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBar(),
       drawer: NavBar(),
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: OrientationBuilder(
-            builder: (context, orientation) {
-              if(orientation == Orientation.portrait){
-                return Column(
-                  children: [
-                    Image.asset(
-                      "images/project-logo.png",
-                      width: 300,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: SearchBar(
-                            controller: searchQuery,
-                            backgroundColor: WidgetStatePropertyAll(Colors.orange),
-                            textStyle: WidgetStatePropertyAll(TextStyle(
-                              color: Colors.white,
-                            )),
-                            leading: Icon(
-                              Icons.search,
-                              color: Colors.white,
-                            ),
-                            trailing: [
-                              GestureDetector(
-                                onTap: (){
-                                  searchQuery.text = "";
-                                },
-                                child: Icon(
-                                  Icons.cancel,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    //Display all models
-                    ModelsList(
-                      initialValue: searchQuery.text,
-                      onChange: (newText){
-                        searchQuery.text = newText;
-                      },
-                    ),
-                  ],
-                );
-              }else{
-                return Row(
-                  children: [
-                    Image.asset(
-                      "images/project-logo.png",
-                      width: 300,
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
+      body: FutureBuilder(
+        future: fetchModels(),
+        builder: (context, asyncSnapshot) {
+          if(asyncSnapshot.hasError){
+            return GestureDetector(
+              onTap: (){
+                setState(() {
+                  
+                });
+              },
+              child: Container(
+                color: Colors.orange,
+                padding: EdgeInsets.all(10),
+                child: Text(
+                  "Reload",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            );
+          }else if(asyncSnapshot.connectionState == ConnectionState.done){
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: OrientationBuilder(
+                  builder: (context, orientation) {
+                    if(orientation == Orientation.portrait){
+                      return Column(
                         children: [
-                          SearchBar(
-                            controller: searchQuery,
-                            backgroundColor: WidgetStatePropertyAll(Colors.orange),
-                            textStyle: WidgetStatePropertyAll(TextStyle(
-                              color: Colors.white,
-                            )),
-                            leading: Icon(
-                              Icons.search,
-                              color: Colors.white,
-                            ),
-                            trailing: [
-                              GestureDetector(
-                                onTap: (){
-                                  searchQuery.text = "";
-                                },
-                                child: Icon(
-                                  Icons.cancel,
-                                  color: Colors.white,
+                          Image.asset(
+                            "images/project-logo.png",
+                            width: 300,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: SearchBar(
+                                  controller: searchQuery,
+                                  backgroundColor: WidgetStatePropertyAll(Colors.orange),
+                                  textStyle: WidgetStatePropertyAll(TextStyle(
+                                    color: Colors.white,
+                                  )),
+                                  leading: Icon(
+                                    Icons.search,
+                                    color: Colors.white,
+                                  ),
+                                  trailing: [
+                                    GestureDetector(
+                                      onTap: (){
+                                        searchQuery.text = "";
+                                      },
+                                      child: Icon(
+                                        Icons.cancel,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -106,16 +116,69 @@ class DigitalLibrary extends StatelessWidget {
                             onChange: (newText){
                               searchQuery.text = newText;
                             },
+                            allModels: asyncSnapshot.data as List<Model>,
                           ),
                         ],
-                      ),
-                    ),
-                  ],
-                );
-              }
-            }
-          ),
-        ),
+                      );
+                    }else{
+                      return Row(
+                        children: [
+                          Image.asset(
+                            "images/project-logo.png",
+                            width: 300,
+                          ),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                SearchBar(
+                                  controller: searchQuery,
+                                  backgroundColor: WidgetStatePropertyAll(Colors.orange),
+                                  textStyle: WidgetStatePropertyAll(TextStyle(
+                                    color: Colors.white,
+                                  )),
+                                  leading: Icon(
+                                    Icons.search,
+                                    color: Colors.white,
+                                  ),
+                                  trailing: [
+                                    GestureDetector(
+                                      onTap: (){
+                                        searchQuery.text = "";
+                                      },
+                                      child: Icon(
+                                        Icons.cancel,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                //Display all models
+                                ModelsList(
+                                  initialValue: searchQuery.text,
+                                  onChange: (newText){
+                                    searchQuery.text = newText;
+                                  },
+                                  allModels: asyncSnapshot.data as List<Model>,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                  }
+                ),
+              ),
+            );
+          }else{
+            return Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+              ),
+            );
+          }
+        }
       ),
     );
   }
@@ -125,10 +188,12 @@ class ModelsList extends StatefulWidget {
     super.key,
     required this.initialValue,
     required this.onChange,
+    required this.allModels,
   });
   final String initialValue;
   final TextEditingController searchQuery = TextEditingController();
   final Function(String newString) onChange;
+  final List<Model> allModels;
   @override
   State<ModelsList> createState() => _ModelsListState();
 }
@@ -139,35 +204,20 @@ class _ModelsListState extends State<ModelsList> {
     List<ModelDetails> widgets = [];
     if(widget.searchQuery.text.isEmpty){
       //Do not filter
-      for(Model model in allModels){
+      for(Model model in widget.allModels){
         widgets.add(ModelDetails(model: model));
       }
     }else{
       //Filter
-      for(Model model in allModels){
+      for(Model model in widget.allModels){
         int titleInstances = model.title.instancesOf(widget.searchQuery.text);
-        String description  = "";
-        try{
-          description = await rootBundle.loadString("assets/descriptions/${model.description}");
-        }catch(error){
-          //Do nothing
-        }
-        int descriptionInstances = description.instancesOf(widget.searchQuery.text);
-        int universityIDInstances = model.universityID == null ? 0 : model.universityID!.instancesOf(widget.searchQuery.text);
+        int descriptionInstances = model.description.instancesOf(widget.searchQuery.text);
         int zenodoDigitalObjectIdentifierInstances = model.zenodoDigitalObjectIdentifier.instancesOf(widget.searchQuery.text);
-        int locationFoundInstances = model.locationFound == null ? 0 : model.locationFound!.instancesOf(widget.searchQuery.text);
-        int dateTimeFoundInstances = model.dateTimeFound == null ? 0 : model.dateTimeFound!.toString().instancesOf(widget.searchQuery.text);
         if(0 < titleInstances){
           widgets.add(ModelDetails(model: model));
         }else if(0 < descriptionInstances){
           widgets.add(ModelDetails(model: model));
-        }else if(0 < universityIDInstances){
-          widgets.add(ModelDetails(model: model));
         }else if(0 < zenodoDigitalObjectIdentifierInstances){
-          widgets.add(ModelDetails(model: model));
-        }else if(0 < locationFoundInstances){
-          widgets.add(ModelDetails(model: model));
-        }else if(0 < dateTimeFoundInstances){
           widgets.add(ModelDetails(model: model));
         }else{
           //No match. Do not add to list.
@@ -184,11 +234,8 @@ class _ModelsListState extends State<ModelsList> {
             //Do nothing
           }
           int descriptionInstances = description.instancesOf(widget.searchQuery.text);
-          int universityIDInstances = modelDetails.model.universityID == null ? 0 : modelDetails.model.universityID!.instancesOf(widget.searchQuery.text);
           int zenodoDigitalObjectIdentifierInstances = modelDetails.model.zenodoDigitalObjectIdentifier.instancesOf(widget.searchQuery.text);
-          int locationFoundInstances = modelDetails.model.locationFound == null ? 0 : modelDetails.model.locationFound!.instancesOf(widget.searchQuery.text);
-          int dateTimeFoundInstances = modelDetails.model.dateTimeFound == null ? 0 : modelDetails.model.dateTimeFound!.toString().instancesOf(widget.searchQuery.text);
-          return titleInstances +  descriptionInstances + universityIDInstances + zenodoDigitalObjectIdentifierInstances + locationFoundInstances + dateTimeFoundInstances;
+          return titleInstances +  descriptionInstances + zenodoDigitalObjectIdentifierInstances;
         },
         reverseOrder: true,
       );
@@ -274,28 +321,7 @@ class ModelDetails extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "University ID: ${model.universityID}",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: "SairaStencil",
-                    ),
-                  ),
-                  Text(
                     "Zenodo Digital Object Identifier: ${model.zenodoDigitalObjectIdentifier}",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: "SairaStencil",
-                    ),
-                  ),
-                  Text(
-                    "Location found: ${model.locationFound}",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: "SairaStencil",
-                    ),
-                  ),
-                  Text(
-                    model.dateTimeFound == null ? "Date Found: null" : "Date Found: ${model.dateTimeFound!.year}-${model.dateTimeFound!.month}-${model.dateTimeFound!.day}",
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: "SairaStencil",
