@@ -71,7 +71,7 @@ class _IconicModelState extends State<IconicModel> {
     // Define the viewer once. Make sure this path exists in pubspec.yaml!
     final Widget modelViewer = ModelViewer(
       key: _viewerKey,
-      src: "assets/3d_models/mural_de_petroglifos_de_salto_arriba_compressed.glb",
+      src: "https://man-well-sharply.ngrok-free.app/default-model",
       autoRotate: true,
       cameraControls: true,
     );

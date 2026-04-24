@@ -8,7 +8,7 @@
 PRODUCT_NAME = the_pale_blue_dot_heritage_project
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.thePaleBlueDotHeritageProject
+PRODUCT_BUNDLE_IDENTIFIER = com.rawware.thePaleBlueDotHeritageProject
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.rawware. All rights reserved.
