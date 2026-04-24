@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:the_pale_blue_dot_heritage_project/about-us.dart';
 import 'package:the_pale_blue_dot_heritage_project/digital-library.dart';
 import 'package:the_pale_blue_dot_heritage_project/widgets.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 

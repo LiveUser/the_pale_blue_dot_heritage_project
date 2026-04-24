@@ -4,7 +4,6 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
-import 'dart:html' as html;
 
 AppBar appBar(){
   return AppBar(
@@ -256,13 +255,11 @@ class _SuperModelViewerState extends State<SuperModelViewer> {
         'Content-Type': 'application/bson',
       },
     );
-    // Create a Blob from the bytes
-    final blob = html.Blob([response.bodyBytes], 'model/gltf-binary');
-    
-    // Create a temporary URL pointing to that Blob
-    final blobUrl = html.Url.createObjectUrlFromBlob(blob);
-    
-    return blobUrl;
+    print("--------------------------------------------------------------------");
+    print(response.bodyBytes);
+   String base64Model = base64Encode(response.bodyBytes);
+    // Return it as a Data URI that the Webview can read
+    return "data:model/gltf-binary;base64,$base64Model";
   }
 
   @override
