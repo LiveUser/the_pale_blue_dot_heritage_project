@@ -44,7 +44,7 @@ class _DigitalLibraryState extends State<DigitalLibrary> {
         title: model["title"] ?? "No title", 
         description: model["description"] ?? "No description", 
         zenodoDigitalObjectIdentifier: model["zenodoDOI"], 
-        objectUUID: model["model"]["uuid"],
+        zenodoDownloadLink: model["zenodoDownloadLink"],
       ));
     }
     return models;

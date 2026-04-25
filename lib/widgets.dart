@@ -234,74 +234,18 @@ class _SpeakLoudButtonState extends State<SpeakLoudButton> {
     );
   }
 }
-class SuperModelViewer extends StatefulWidget {
+class SuperModelViewer extends StatelessWidget {
   const SuperModelViewer({
     super.key,
-    required this.objectUUID,
+    required this.base64String,
   });
-  final String objectUUID;
-  @override
-  State<SuperModelViewer> createState() => _SuperModelViewerState();
-}
-
-class _SuperModelViewerState extends State<SuperModelViewer> {
-  Future<String> fetchData()async{
-    String url = "https://man-well-sharply.ngrok-free.app/3d-model/${widget.objectUUID}";
-    //print(url);
-    Response response = await get(
-      Uri.parse(url),
-      headers: {
-        'ngrok-skip-browser-warning': 'true', // This skips the ngrok landing page
-        'Content-Type': 'application/bson',
-      },
-    );
-    print("--------------------------------------------------------------------");
-    print(response.bodyBytes);
-   String base64Model = base64Encode(response.bodyBytes);
-    // Return it as a Data URI that the Webview can read
-    return "data:model/gltf-binary;base64,$base64Model";
-  }
-
+  final String base64String;
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: fetchData(),
-      builder: (context,snapshot){
-        if(snapshot.hasError){
-          return GestureDetector(
-            onTap: (){
-              setState(() {
-                
-              });
-            },
-            child: Center(
-              child: Container(
-                color: Colors.orange,
-                padding: EdgeInsets.all(10),
-                child: Text(
-                  "Reload",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }else if(snapshot.connectionState == ConnectionState.done){
-          return ModelViewer(
-            key: widget.key,
-            src: snapshot.data as String,
-            autoRotate: true,
-            cameraControls: true,
-          );
-        }else{
-          return Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Colors.orange),
-            ),
-          );
-        }
-      },
+    return ModelViewer(
+      src: base64String,
+      autoRotate: true,
+      cameraControls: true,
     );
   }
 }
