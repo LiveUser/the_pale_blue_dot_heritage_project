@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:the_pale_blue_dot_heritage_project/dataset.dart';
+import 'package:the_pale_blue_dot_heritage_project/variables_and_functions.dart';
 import 'widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,7 +23,7 @@ class _ModelViewerState extends State<ModelViewer> {
   Future<String> fetchData()async{
     //print(url);
     Response response = await get(
-      Uri.parse(widget.model.zenodoDownloadLink),
+      getRedirectURL(widget.model.zenodoDownloadLink),
       headers: {
         'ngrok-skip-browser-warning': 'true', // This skips the ngrok landing page
       },
@@ -53,15 +54,23 @@ class _ModelViewerState extends State<ModelViewer> {
                   });
                 },
                 child: Center(
-                  child: Container(
-                    color: Colors.orange,
-                    padding: EdgeInsets.all(10),
-                    child: Text(
-                      "Reload",
-                      style: TextStyle(
-                        color: Colors.white,
+                  child: Column(
+                    spacing: 10,
+                    children: [
+                      Text(
+                        asyncSnapshot.error.toString(),
                       ),
-                    ),
+                      Container(
+                        color: Colors.orange,
+                        padding: EdgeInsets.all(10),
+                        child: Text(
+                          "Reload",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -163,7 +172,7 @@ class ModelDetailsDisplayer extends StatelessWidget {
           ),
           GestureDetector(
             onTap: (){
-              //TODO: Open Zenodo Link
+              //Open Zenodo Link
               final Uri uri = Uri.parse(model.zenodoDigitalObjectIdentifier);
               launchUrl(
                 uri,

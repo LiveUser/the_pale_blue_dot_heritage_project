@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:the_pale_blue_dot_heritage_project/model-viewer.dart';
+import 'package:the_pale_blue_dot_heritage_project/variables_and_functions.dart';
 import 'widgets.dart';
 import 'dataset.dart';
 import 'package:lost/lost.dart';
@@ -28,7 +29,7 @@ class _DigitalLibraryState extends State<DigitalLibrary> {
       "query": "get-object-list",
     };
     Response response = await post(
-      Uri.parse("https://man-well-sharply.ngrok-free.app/graphene"),
+      Uri.parse("$apiURL/graphene"),
       body: BsonCodec.serialize(requestBody).byteList,
       headers: {
         'ngrok-skip-browser-warning': 'true', // This skips the ngrok landing page
@@ -50,15 +51,21 @@ class _DigitalLibraryState extends State<DigitalLibrary> {
     return models;
   }
   @override
+  void dispose(){
+    super.dispose();
+    searchQuery.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBar(),
       drawer: NavBar(),
       backgroundColor: Colors.white,
+      //Fetch, orient, display
       body: FutureBuilder(
-        future: fetchModels(),
-        builder: (context, asyncSnapshot) {
-          if(asyncSnapshot.hasError){
+        future: fetchModels(), 
+        builder: (context,snapshot){
+          if(snapshot.hasError){
             return GestureDetector(
               onTap: (){
                 setState(() {
@@ -78,68 +85,61 @@ class _DigitalLibraryState extends State<DigitalLibrary> {
                 ),
               ),
             );
-          }else if(asyncSnapshot.connectionState == ConnectionState.done){
+          }else if(snapshot.connectionState == ConnectionState.done){
             return SafeArea(
               child: Padding(
-                padding: EdgeInsets.all(20),
-                child: OrientationBuilder(
-                  builder: (context, orientation) {
+                padding: EdgeInsetsGeometry.all(20),
+                child: DeviceOrientationBuilder(
+                  builder: (context, orientation){
                     if(orientation == Orientation.portrait){
                       return Column(
+                        spacing: 10,
                         children: [
                           Image.asset(
                             "images/project-logo.png",
-                            width: 300,
+                            width: 200,
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: SearchBar(
-                                  controller: searchQuery,
-                                  backgroundColor: WidgetStatePropertyAll(Colors.orange),
-                                  textStyle: WidgetStatePropertyAll(TextStyle(
-                                    color: Colors.white,
-                                  )),
-                                  leading: Icon(
-                                    Icons.search,
-                                    color: Colors.white,
-                                  ),
-                                  trailing: [
-                                    GestureDetector(
-                                      onTap: (){
-                                        searchQuery.text = "";
-                                      },
-                                      child: Icon(
-                                        Icons.cancel,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
+                          SearchBar(
+                            controller: searchQuery,
+                            backgroundColor: WidgetStatePropertyAll(Colors.orange),
+                            textStyle: WidgetStatePropertyAll(TextStyle(
+                              color: Colors.white,
+                            )),
+                            leading: Icon(
+                              Icons.search,
+                              color: Colors.white,
+                            ),
+                            trailing: [
+                              GestureDetector(
+                                onTap: (){
+                                  searchQuery.text = "";
+                                },
+                                child: Icon(
+                                  Icons.cancel,
+                                  color: Colors.white,
                                 ),
                               ),
                             ],
                           ),
                           //Display all models
                           ModelsList(
-                            initialValue: searchQuery.text,
-                            onChange: (newText){
-                              searchQuery.text = newText;
-                            },
-                            allModels: asyncSnapshot.data as List<Model>,
+                            searchQuery: searchQuery,
+                            allModels: snapshot.data as List<Model>,
                           ),
                         ],
                       );
                     }else{
                       return Row(
+                        spacing: 10,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Image.asset(
                             "images/project-logo.png",
-                            width: 300,
+                            width: 200,
                           ),
                           Expanded(
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                              spacing: 10,
                               children: [
                                 SearchBar(
                                   controller: searchQuery,
@@ -165,11 +165,8 @@ class _DigitalLibraryState extends State<DigitalLibrary> {
                                 ),
                                 //Display all models
                                 ModelsList(
-                                  initialValue: searchQuery.text,
-                                  onChange: (newText){
-                                    searchQuery.text = newText;
-                                  },
-                                  allModels: asyncSnapshot.data as List<Model>,
+                                  searchQuery: searchQuery,
+                                  allModels: snapshot.data as List<Model>,
                                 ),
                               ],
                             ),
@@ -177,9 +174,9 @@ class _DigitalLibraryState extends State<DigitalLibrary> {
                         ],
                       );
                     }
-                  }
+                  },
                 ),
-              ),
+              )
             );
           }else{
             return Center(
@@ -188,21 +185,18 @@ class _DigitalLibraryState extends State<DigitalLibrary> {
               ),
             );
           }
-        }
+        },
       ),
     );
   }
 }
 class ModelsList extends StatefulWidget {
-  ModelsList({
+  const ModelsList({
     super.key,
-    required this.initialValue,
-    required this.onChange,
+    required this.searchQuery,
     required this.allModels,
   });
-  final String initialValue;
-  final TextEditingController searchQuery = TextEditingController();
-  final Function(String newString) onChange;
+  final TextEditingController searchQuery;
   final List<Model> allModels;
   @override
   State<ModelsList> createState() => _ModelsListState();
@@ -252,23 +246,23 @@ class _ModelsListState extends State<ModelsList> {
     }
     return widgets;
   }
-
-  @override
-  void initState(){
-    super.initState();
-    widget.searchQuery.text = widget.initialValue;
-    widget.searchQuery.addListener((){
-      widget.onChange(widget.searchQuery.text);
+  void reload(){
+    if(mounted){
       setState(() {
         
       });
-    });
+    }
+  }
+  @override
+  void initState(){
+    super.initState();
+    widget.searchQuery.text = widget.searchQuery.text;
+    widget.searchQuery.addListener(reload);
   }
   @override
   void dispose(){
     super.dispose();
-    widget.searchQuery.removeListener((){});
-    widget.searchQuery.dispose();
+    widget.searchQuery.removeListener(reload);
   }
   @override
   Widget build(BuildContext context) {
